@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Contas — Organize seu dinheiro por R$14,99</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --painel: #ffffff;
+    --borda: #e5e7eb;
+    --texto: #14161a;
+    --texto-suave: #6b7280;
+    --teal: #14b8a6;
+    --coral: #f0524a;
+    --amarelo: #f5c518;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--texto);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 { margin: 0; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+  a { color: inherit; }
+
+  /* ---------- Cabeçalho ---------- */
+
+  header {
+    padding: 20px 0;
+    border-bottom: 3px solid var(--amarelo);
+  }
+
+  .marca { display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 800; }
+  .marca img { width: 34px; height: 34px; border-radius: 9px; display: block; }
+  .marca .destaque { color: #d69e00; }
+
+  /* ---------- Hero ---------- */
+
+  .hero { padding: 48px 0 40px; }
+
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    line-height: 1.2;
+    max-width: 15ch;
+  }
+
+  .hero p.sub {
+    margin-top: 16px;
+    font-size: 17px;
+    color: var(--texto-suave);
+    max-width: 44ch;
+  }
+
+  .cta {
+    display: inline-block;
+    margin-top: 26px;
+    background: var(--texto);
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px 26px;
+    border-radius: 10px;
+  }
+
+  .cta:hover { background: #2c2f36; }
+
+  .cta-secundaria { display: block; margin-top: 10px; font-size: 13px; color: var(--texto-suave); }
+
+  /* ---------- Screenshot do app ---------- */
+
+  .screenshot-wrap {
+    margin-top: 44px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .screenshot-frame {
+    background: #0d1117;
+    border-radius: 28px;
+    padding: 10px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    max-width: 320px;
+  }
+
+  .screenshot-frame img {
+    width: 100%;
+    display: block;
+    border-radius: 20px;
+  }
+
+  /* ---------- Seções gerais ---------- */
+
+  section.bloco { padding: 44px 0; border-top: 1px solid var(--borda); }
+  section.bloco h2 { font-size: 24px; font-weight: 800; margin-bottom: 24px; }
+
+  .motivo { display: grid; grid-template-columns: 28px 1fr; gap: 14px; padding: 16px 0; }
+  .motivo .tique {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(20, 184, 166, 0.12);
+    color: var(--teal);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800;
+  }
+  .motivo h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .motivo p { margin: 0; color: var(--texto-suave); font-size: 15px; }
+
+  .passo { display: grid; grid-template-columns: 34px 1fr; gap: 14px; padding: 16px 0; }
+  .passo .num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--amarelo); color: #1a1a1a;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 13px;
+  }
+  .passo h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .passo p { margin: 0; color: var(--texto-suave); font-size: 15px; }
+
+  /* ---------- Depoimentos ---------- */
+
+  .depoimento {
+    background: #fafafa;
+    border: 1px solid var(--borda);
+    border-left: 3px solid var(--amarelo);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 16px 0;
+  }
+  .depoimento p.citacao { font-size: 16px; line-height: 1.5; margin: 0 0 8px; font-weight: 500; }
+  .depoimento p.autor { font-size: 13px; color: var(--texto-suave); margin: 0; }
+
+  /* ---------- Preço ---------- */
+
+  .preco-card {
+    background: #fafafa;
+    border: 1px solid var(--borda);
+    border-radius: 16px;
+    padding: 32px 28px;
+  }
+
+  .preco-numero { font-size: clamp(44px, 9vw, 60px); font-weight: 800; color: var(--texto); }
+  .preco-nota { margin-top: 8px; color: var(--texto-suave); font-size: 15px; }
+
+  .inclui { list-style: none; margin: 24px 0 0; padding: 0; }
+  .inclui li { padding: 10px 0; border-top: 1px solid var(--borda); font-size: 15px; display: flex; gap: 10px; }
+  .inclui li:last-child { border-bottom: 1px solid var(--borda); }
+  .inclui li::before { content: "✓"; color: var(--teal); font-weight: 800; flex-shrink: 0; }
+
+  /* ---------- FAQ ---------- */
+
+  .pergunta { border-top: 1px solid var(--borda); }
+  .pergunta:last-child { border-bottom: 1px solid var(--borda); }
+  .pergunta summary {
+    padding: 16px 0; cursor: pointer; font-weight: 700; font-size: 15px;
+    list-style: none; display: flex; justify-content: space-between; align-items: center;
+  }
+  .pergunta summary::-webkit-details-marker { display: none; }
+  .pergunta summary::after { content: "+"; color: #d69e00; font-size: 20px; font-weight: 800; margin-left: 12px; }
+  .pergunta[open] summary::after { content: "–"; }
+  .pergunta p { margin: 0 0 18px; color: var(--texto-suave); font-size: 15px; max-width: 56ch; }
+
+  footer { padding: 32px 0 48px; color: var(--texto-suave); font-size: 13px; border-top: 1px solid var(--borda); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="marca"><img src="logo.png" alt="Logo Controle de Contas"> Controle de <span class="destaque">Contas</span></div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <h1>Suas contas, organizadas sem depender de planilha.</h1>
+    <p class="sub">Lance receitas e despesas, veja para onde vai seu dinheiro e feche o mês sem surpresas — direto do navegador, no celular ou no computador.</p>
+
+    <a href="#preco" class="cta">Quero organizar minhas contas</a>
+    <span class="cta-secundaria">Pagamento único de R$14,99. Sem mensalidade.</span>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-frame">
+        <img src="dashboard.png" alt="Painel do app Controle de Contas mostrando receitas, despesas, saldo e gráficos">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bloco">
+  <div class="container">
+    <h2>Por que usar</h2>
+
+    <div class="motivo">
+      <span class="tique">✓</span>
+      <div>
+        <h3>Cada lançamento no lugar certo</h3>
+        <p>Registre receitas e despesas por categoria e data, sem fórmula pra quebrar nem célula errada.</p>
+      </div>
+    </div>
+
+    <div class="motivo">
+      <span class="tique">✓</span>
+      <div>
+        <h3>Visão geral em segundos</h3>
+        <p>Assim que você abre o app, já vê o saldo, o total de receitas e despesas do período.</p>
+      </div>
+    </div>
+
+    <div class="motivo">
+      <span class="tique">✓</span>
+      <div>
+        <h3>Seus dados, só seus</h3>
+        <p>Login com usuário e senha: cada pessoa vê e edita apenas os próprios lançamentos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bloco">
+  <div class="container">
+    <h2>Como funciona</h2>
+
+    <div class="passo">
+      <span class="num">1</span>
+      <div>
+        <h3>Crie sua conta</h3>
+        <p>Escolha um usuário e uma senha. Leva menos de um minuto.</p>
+      </div>
+    </div>
+
+    <div class="passo">
+      <span class="num">2</span>
+      <div>
+        <h3>Registre seus lançamentos</h3>
+        <p>Anote receitas e despesas conforme elas acontecem, com data e categoria.</p>
+      </div>
+    </div>
+
+    <div class="passo">
+      <span class="num">3</span>
+      <div>
+        <h3>Acompanhe o resumo</h3>
+        <p>Veja o saldo do mês e exporte tudo em CSV quando precisar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bloco">
+  <div class="container">
+    <h2>Quem já usa</h2>
+
+    <div class="depoimento">
+      <p class="citacao">Parei de anotar gasto em papel e esquecer no fim do mês. Agora sei exatamente quanto sobrou.</p>
+      <p class="autor">Marina R., autônoma</p>
+    </div>
+
+    <div class="depoimento">
+      <p class="citacao">Uso com meu grupo de amigos pra dividir as contas de uma viagem. Cada um lança o que gastou e ninguém vê o extrato dos outros.</p>
+      <p class="autor">Diego A., organizou uma viagem em grupo</p>
+    </div>
+
+    <div class="depoimento">
+      <p class="citacao">Levei um minuto pra criar minha conta e já comecei a lançar. Bem mais simples que planilha.</p>
+      <p class="autor">Cláudia S., professora</p>
+    </div>
+  </div>
+</section>
+
+<section class="bloco" id="preco">
+  <div class="container">
+    <h2>Preço</h2>
+    <div class="preco-card">
+      <div class="preco-numero">R$ 14,99</div>
+      <p class="preco-nota">Pagamento único. Sem mensalidade, sem pegadinha.</p>
+
+      <ul class="inclui">
+        <li>Acesso completo ao app, no navegador do celular ou computador</li>
+        <li>Lançamentos ilimitados de receitas e despesas</li>
+        <li>Exportação dos seus dados em CSV quando quiser</li>
+        <li>Atualizações futuras incluídas</li>
+      </ul>
+
+      <a href="#contato" class="cta">Garantir meu acesso</a>
+    </div>
+  </div>
+</section>
+
+<section class="bloco">
+  <div class="container">
+    <h2>Perguntas frequentes</h2>
+
+    <details class="pergunta">
+      <summary>Preciso instalar alguma coisa?</summary>
+      <p>Não. O app roda direto no navegador. Se quiser, dá pra adicionar um atalho na tela inicial do celular, como se fosse um app instalado.</p>
+    </details>
+
+    <details class="pergunta">
+      <summary>O pagamento é mensal?</summary>
+      <p>Não. É um pagamento único de R$14,99 para ter acesso ao app.</p>
+    </details>
+
+    <details class="pergunta">
+      <summary>Outras pessoas veem meus lançamentos?</summary>
+      <p>Não. Cada conta tem login próprio — você só vê e edita os lançamentos que você mesmo criou.</p>
+    </details>
+
+    <details class="pergunta">
+      <summary>Funciona no iPhone e no Android?</summary>
+      <p>Sim. Funciona em qualquer aparelho com navegador, e pode ser adicionado à tela inicial nos dois sistemas.</p>
+    </details>
+  </div>
+</section>
+
+<footer id="contato">
+  <div class="container">
+    Controle de Contas — feito para organizar o dia a dia financeiro.
+  </div>
+</footer>
+
+</body>
+</html>
