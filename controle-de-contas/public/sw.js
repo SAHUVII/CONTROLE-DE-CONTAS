@@ -1,4 +1,4 @@
-const CACHE_NOME = 'controle-de-contas-v1';
+const CACHE_NOME = 'controle-de-contas-v2';
 
 const ARQUIVOS_ESSENCIAIS = [
   '/',
