@@ -155,7 +155,7 @@ function gerarId() {
 const server = http.createServer(async (req, res) => {
   let url;
   try {
-    url = new URL(req.url, http://${req.headers.host});
+    url = new URL(req.url, `http://${req.headers.host}`);
   } catch (e) {
     res.writeHead(400);
     return res.end('Requisição inválida');
@@ -171,7 +171,7 @@ const server = http.createServer(async (req, res) => {
       const nomeCriado = criarUsuario(usuario, senha);
       const sid = criarSessao(nomeCriado);
       return enviarJSON(res, 201, { usuario: nomeCriado }, {
-        'Set-Cookie': sid=${sid}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax,
+        'Set-Cookie': `sid=${sid}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax`,
       });
     } catch (e) {
       return enviarJSON(res, 400, { erro: e.message });
@@ -185,7 +185,7 @@ const server = http.createServer(async (req, res) => {
       if (!nome) return enviarJSON(res, 401, { erro: 'Usuário ou senha inválidos' });
       const sid = criarSessao(nome);
       return enviarJSON(res, 200, { usuario: nome }, {
-        'Set-Cookie': sid=${sid}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax,
+        'Set-Cookie': `sid=${sid}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax`,
       });
     } catch (e) {
       return enviarJSON(res, 400, { erro: 'Requisição inválida' });
@@ -265,7 +265,7 @@ const server = http.createServer(async (req, res) => {
       const dados = lerDadosUsuario(usuarioLogado);
       let csv = 'Data,Descrição,Categoria,Tipo,Valor\n';
       dados.forEach((d) => {
-        csv += ${d.data},"${d.desc}",${d.categoria},${d.tipo},${d.valor.toFixed(2)}\n;
+        csv += `${d.data},"${d.desc}",${d.categoria},${d.tipo},${d.valor.toFixed(2)}\n`;
       });
       res.writeHead(200, {
         'Content-Type': 'text/csv; charset=utf-8',
@@ -301,5 +301,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(Controle de Contas rodando em http://localhost:${PORT});
-})
+  console.log(`Controle de Contas rodando em http://localhost:${PORT}`);
+});
