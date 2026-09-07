@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Contas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg: #1E1E1E;
+    --panel: #252526;
+    --panel-2: #2D2D30;
+    --border: #3F3F46;
+    --text: #E8E8E8;
+    --muted: #A0A0A0;
+    --accent: #F2C811;
+    --teal: #01B8AA;
+    --red: #FD625E;
+    --blue: #3599B8;
+    --font: 'Segoe UI', 'Segoe UI Semibold', Tahoma, Geneva, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+  }
+
+  /* -------- Logo / cabeçalho do app -------- */
+  .app-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: var(--panel);
+    border-bottom: 2px solid var(--accent);
+  }
+  .app-header .logo-icon {
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    color: #1E1E1E;
+    font-weight: 700;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .app-header .logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--text);
+  }
+  .app-header .logo-text span {
+    color: var(--accent);
+  }
+  .conn-status {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .conn-status .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--teal);
+  }
+  .conn-status.offline .dot { background: var(--red); }
+
+  .app {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: calc(100vh - 60px);
+  }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { order: 2; }
+  }
+
+  .sidebar {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 18px 16px;
+  }
+  .lock-note {
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+  .lock-note svg { vertical-align: -2px; margin-right: 3px; }
+  .slicer { margin-bottom: 22px; }
+  .slicer h4 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 10px;
+    font-weight: 600;
+  }
+  .slicer-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12.5px;
+    margin-bottom: 2px;
+    border: 1px solid transparent;
+  }
+  .slicer-option:hover { background: var(--panel-2); }
+  .slicer-option.active {
+    background: rgba(242,200,17,0.12);
+    border-color: rgba(242,200,17,0.4);
+    color: var(--accent);
+  }
+  .btn-reset {
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 7px;
+    border-radius: 3px;
+    font-size: 11.5px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .btn-reset:hover { color: var(--text); border-color: var(--muted); }
+
+  .content { padding: 18px 22px 32px; }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .topbar h1 { font-size: 19px; font-weight: 600; margin: 0; }
+  .topbar .sub { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+  .topbar-actions button {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 3px;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  .topbar-actions button:hover { border-color: var(--accent); }
+  .save-status {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .save-status .pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--teal);
+  }
+  .save-status.saving .pulse { background: var(--accent); }
+  .save-status.erro .pulse { background: var(--red); }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 700px) { .kpi-row { grid-template-columns: repeat(2,1fr); } }
+  .kpi-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+    border-top: 3px solid var(--border);
+  }
+  .kpi-card.income { border-top-color: var(--teal); }
+  .kpi-card.expense { border-top-color: var(--red); }
+  .kpi-card.balance { border-top-color: var(--accent); }
+  .kpi-card.count { border-top-color: var(--blue); }
+  .kpi-card .label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .kpi-card .value {
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-card.income .value { color: var(--teal); }
+  .kpi-card.expense .value { color: var(--red); }
+  .kpi-card.balance .value { color: var(--accent); }
+
+  .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .visual {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+  .visual h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 10px;
+  }
+  .visual-body { position: relative; height: 240px; }
+  .visual-body.small { height: 190px; }
+
+  .table-visual table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .table-visual th {
+    text-align: left;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+  .table-visual td { padding: 6px 8px; border-bottom: 1px solid #2a2a2c; }
+  .table-visual tr:hover td { background: var(--panel-2); }
+  .table-visual .valor { text-align: right; font-variant-numeric: tabular-nums; }
+  .table-visual .valor.receita { color: var(--teal); }
+  .table-visual .valor.despesa { color: var(--red); }
+  .table-visual td[contenteditable="true"] { cursor: text; outline: none; }
+  .table-visual td[contenteditable="true"]:focus { box-shadow: inset 0 0 0 1px var(--accent); }
+  .table-visual select {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 11.5px;
+    padding: 2px 4px;
+  }
+  .del-btn { background: none; border: none; color: var(--red); cursor: pointer; font-size: 13px; }
+  .add-row-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--accent);
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+  }
+  .add-row-link:hover { text-decoration: underline; }
+  .empty-note { color: var(--muted); text-align: center; padding: 20px; font-size: 12px; }
+  .loading-screen {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 13px; z-index: 999;
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">Conectando ao servidor…</div>
+
+<div id="appRoot" style="display:none;">
+
+  <div class="app-header">
+    <div class="logo-icon">$</div>
+    <div class="logo-text">Controle de <span>Contas</span></div>
+    <div class="conn-status" id="connStatus"><div class="dot"></div><span>Conectado ao servidor</span></div>
+  </div>
+
+  <div class="app">
+    <div class="sidebar">
+      <div class="lock-note">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Seus dados ficam salvos no servidor, acessíveis de qualquer aparelho.
+      </div>
+
+      <div class="slicer">
+        <h4>Mês</h4>
+        <div id="slicerMes"></div>
+      </div>
+      <div class="slicer">
+        <h4>Categoria</h4>
+        <div id="slicerCategoria"></div>
+      </div>
+      <button class="btn-reset" id="btnResetFiltros">Limpar filtros</button>
+    </div>
+
+    <div class="content">
+      <div class="topbar">
+        <div>
+          <h1>Visão Geral Financeira</h1>
+          <div class="sub" id="periodoLabel">Todos os períodos</div>
+        </div>
+        <div class="topbar-actions">
+          <div class="save-status" id="saveStatus"><div class="pulse"></div><span>Salvo</span></div>
+          <button id="btnExportCsv">Exportar CSV</button>
+        </div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-card income"><div class="label">Receitas</div><div class="value" id="kpiReceitas">R$ 0,00</div></div>
+        <div class="kpi-card expense"><div class="label">Despesas</div><div class="value" id="kpiDespesas">R$ 0,00</div></div>
+        <div class="kpi-card balance"><div class="label">Saldo</div><div class="value" id="kpiSaldo">R$ 0,00</div></div>
+        <div class="kpi-card count"><div class="label">Lançamentos</div><div class="value" id="kpiCount">0</div></div>
+      </div>
+
+      <div class="grid">
+        <div class="visual">
+          <h3>Receitas x Despesas por mês</h3>
+          <div class="visual-body"><canvas id="chartMensal"></canvas></div>
+        </div>
+        <div class="visual">
+          <h3>Despesas por categoria</h3>
+          <div class="visual-body"><canvas id="chartCategoria"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="visual">
+          <h3>Evolução do saldo acumulado</h3>
+          <div class="visual-body small"><canvas id="chartSaldo"></canvas></div>
+        </div>
+        <div class="visual">
+          <h3>Top 5 despesas</h3>
+          <div class="visual-body small"><canvas id="chartTop5"></canvas></div>
+        </div>
+      </div>
+
+      <div class="visual table-visual">
+        <h3>Lançamentos</h3>
+        <table>
+          <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th style="text-align:right;">Valor</th><th></th></tr></thead>
+          <tbody id="sheetBody"></tbody>
+        </table>
+        <button class="add-row-link" id="btnAddRow">+ Adicionar lançamento</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CATEGORIAS = ["Salário","Alimentação","Moradia","Transporte","Saúde","Lazer","Educação","Outros"];
+const API_BASE = '/api/lancamentos';
+
+let dados = [];
+let filtros = { mes: null, categoria: null };
+let charts = {};
+let saveTimeout = null;
+
+function formatBRL(v) {
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+function mesLabel(dataStr) {
+  const [y,m] = dataStr.split('-');
+  const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  return meses[parseInt(m,10)-1] + '/' + y.slice(2);
+}
+function setConn(ok) {
+  const el = document.getElementById('connStatus');
+  el.classList.toggle('offline', !ok);
+  el.querySelector('span').textContent = ok ? 'Conectado ao servidor' : 'Servidor indisponível';
+}
+function setSaveStatus(state) {
+  const statusEl = document.getElementById('saveStatus');
+  statusEl.classList.remove('saving', 'erro');
+  if (state === 'saving') { statusEl.classList.add('saving'); statusEl.querySelector('span').textContent = 'Salvando…'; }
+  else if (state === 'erro') { statusEl.classList.add('erro'); statusEl.querySelector('span').textContent = 'Falha ao salvar'; }
+  else { statusEl.querySelector('span').textContent = 'Salvo'; }
+}
+
+// ---------- Comunicação com o servidor próprio ----------
+async function carregarDados() {
+  const resp = await fetch(API_BASE);
+  if (!resp.ok) throw new Error('Falha ao carregar dados');
+  dados = await resp.json();
+  setConn(true);
+}
+
+async function criarLancamento(item) {
+  setSaveStatus('saving');
+  try {
+    const resp = await fetch(API_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item),
+    });
+    if (!resp.ok) throw new Error();
+    const criado = await resp.json();
+    setSaveStatus('salvo');
+    setConn(true);
+    return criado;
+  } catch (e) {
+    setSaveStatus('erro');
+    setConn(false);
+    throw e;
+  }
+}
+
+function atualizarLancamento(id, campos) {
+  setSaveStatus('saving');
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(async () => {
+    try {
+      const resp = await fetch(`${API_BASE}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(campos),
+      });
+      if (!resp.ok) throw new Error();
+      setSaveStatus('salvo');
+      setConn(true);
+    } catch (e) {
+      setSaveStatus('erro');
+      setConn(false);
+    }
+  }, 400);
+}
+
+async function removerLancamento(id) {
+  setSaveStatus('saving');
+  try {
+    const resp = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+    if (!resp.ok) throw new Error();
+    setSaveStatus('salvo');
+    setConn(true);
+  } catch (e) {
+    setSaveStatus('erro');
+    setConn(false);
+  }
+}
+
+// ---------- Slicers ----------
+function renderSlicers() {
+  const mesesUnicos = [...new Set(dados.map(d => d.data.slice(0,7)))].sort();
+  const catsUnicas = [...new Set(dados.map(d => d.categoria))].sort();
+
+  const mesEl = document.getElementById('slicerMes');
+  mesEl.innerHTML = mesesUnicos.map(m => `
+    <div class="slicer-option ${filtros.mes === m ? 'active' : ''}" data-mes="${m}"><span>${mesLabel(m+'-01')}</span></div>`).join('');
+  mesEl.querySelectorAll('.slicer-option').forEach(el => {
+    el.addEventListener('click', () => {
+      filtros.mes = filtros.mes === el.dataset.mes ? null : el.dataset.mes;
+      renderView();
+    });
+  });
+
+  const catEl = document.getElementById('slicerCategoria');
+  catEl.innerHTML = catsUnicas.map(c => `
+    <div class="slicer-option ${filtros.categoria === c ? 'active' : ''}" data-cat="${c}"><span>${c}</span></div>`).join('');
+  catEl.querySelectorAll('.slicer-option').forEach(el => {
+    el.addEventListener('click', () => {
+      filtros.categoria = filtros.categoria === el.dataset.cat ? null : el.dataset.cat;
+      renderView();
+    });
+  });
+
+  const label = document.getElementById('periodoLabel');
+  const parts = [];
+  if (filtros.mes) parts.push(mesLabel(filtros.mes+'-01'));
+  if (filtros.categoria) parts.push(filtros.categoria);
+  label.textContent = parts.length ? parts.join(' • ') : 'Todos os períodos';
+}
+
+function dadosFiltrados() {
+  return dados.filter(d => {
+    if (filtros.mes && d.data.slice(0,7) !== filtros.mes) return false;
+    if (filtros.categoria && d.categoria !== filtros.categoria) return false;
+    return true;
+  });
+}
+
+// ---------- Tabela ----------
+function renderSheet() {
+  const tbody = document.getElementById('sheetBody');
+  const filtrados = dadosFiltrados();
+  tbody.innerHTML = '';
+
+  if (filtrados.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-note">Nenhum lançamento neste filtro.</td></tr>';
+  }
+
+  filtrados.forEach((item) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td contenteditable="true" data-field="data" data-id="${item.id}">${item.data}</td>
+      <td contenteditable="true" data-field="desc" data-id="${item.id}">${item.desc}</td>
+      <td>
+        <select data-field="categoria" data-id="${item.id}">
+          ${CATEGORIAS.map(c => `<option value="${c}" ${c===item.categoria?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <select data-field="tipo" data-id="${item.id}">
+          <option value="receita" ${item.tipo==='receita'?'selected':''}>Receita</option>
+          <option value="despesa" ${item.tipo==='despesa'?'selected':''}>Despesa</option>
+        </select>
+      </td>
+      <td class="valor ${item.tipo}" contenteditable="true" data-field="valor" data-id="${item.id}">${item.valor.toFixed(2).replace('.',',')}</td>
+      <td><button class="del-btn" data-id="${item.id}">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('td[contenteditable="true"]').forEach(td => td.addEventListener('blur', onCellEdit));
+  tbody.querySelectorAll('select[data-field]').forEach(sel => sel.addEventListener('change', onCellEdit));
+  tbody.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      dados = dados.filter(d => d.id !== id);
+      renderView();
+      await removerLancamento(id);
+    });
+  });
+}
+
+function onCellEdit(e) {
+  const el = e.target;
+  const id = el.dataset.id;
+  const field = el.dataset.field;
+  let val = el.tagName === 'SELECT' ? el.value : el.textContent.trim();
+  if (field === 'valor') val = parseFloat(val.replace(/\./g,'').replace(',','.')) || 0;
+
+  const item = dados.find(d => d.id === id);
+  if (!item) return;
+  item[field] = val;
+  renderView();
+  atualizarLancamento(id, { [field]: val });
+}
+
+// ---------- KPIs ----------
+function renderKPIs(filtrados) {
+  const receitas = filtrados.filter(d => d.tipo === 'receita').reduce((s,d)=>s+d.valor,0);
+  const despesas = filtrados.filter(d => d.tipo === 'despesa').reduce((s,d)=>s+d.valor,0);
+  document.getElementById('kpiReceitas').textContent = formatBRL(receitas);
+  document.getElementById('kpiDespesas').textContent = formatBRL(despesas);
+  document.getElementById('kpiSaldo').textContent = formatBRL(receitas - despesas);
+  document.getElementById('kpiCount').textContent = filtrados.length;
+}
+
+// ---------- Gráficos ----------
+const gridColor = 'rgba(255,255,255,0.06)';
+Chart.defaults.color = '#A0A0A0';
+Chart.defaults.font.family = "'Segoe UI', Tahoma, sans-serif";
+
+function renderCharts(filtrados) {
+  const mesesMap = {};
+  filtrados.forEach(d => {
+    const m = d.data.slice(0,7);
+    if (!mesesMap[m]) mesesMap[m] = { receita: 0, despesa: 0 };
+    mesesMap[m][d.tipo] += d.valor;
+  });
+  const mesesOrdenados = Object.keys(mesesMap).sort();
+
+  if (charts.mensal) charts.mensal.destroy();
+  charts.mensal = new Chart(document.getElementById('chartMensal'), {
+    type: 'bar',
+    data: { labels: mesesOrdenados.map(m => mesLabel(m+'-01')), datasets: [
+      { label: 'Receitas', data: mesesOrdenados.map(m => mesesMap[m].receita), backgroundColor: '#01B8AA', borderRadius: 2 },
+      { label: 'Despesas', data: mesesOrdenados.map(m => mesesMap[m].despesa), backgroundColor: '#FD625E', borderRadius: 2 }
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
+      scales: { x: { grid: { color: gridColor } }, y: { grid: { color: gridColor }, ticks: { callback: v => 'R$'+v } } }
+    }
+  });
+
+  const catMap = {};
+  filtrados.filter(d => d.tipo === 'despesa').forEach(d => { catMap[d.categoria] = (catMap[d.categoria] || 0) + d.valor; });
+  const cores = ['#F2C811','#FD625E','#01B8AA','#3599B8','#A66999','#8AD4EB','#FDA357','#7D7D7D'];
+
+  if (charts.categoria) charts.categoria.destroy();
+  charts.categoria = new Chart(document.getElementById('chartCategoria'), {
+    type: 'doughnut',
+    data: { labels: Object.keys(catMap), datasets: [{ data: Object.values(catMap), backgroundColor: cores, borderColor: '#252526', borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } } }
+  });
+
+  const ordenados = [...filtrados].sort((a,b) => a.data.localeCompare(b.data));
+  let acumulado = 0;
+  const pontosSaldo = ordenados.map(d => { acumulado += d.tipo === 'receita' ? d.valor : -d.valor; return acumulado; });
+
+  if (charts.saldo) charts.saldo.destroy();
+  charts.saldo = new Chart(document.getElementById('chartSaldo'), {
+    type: 'line',
+    data: { labels: ordenados.map(d => d.data.split('-').reverse().slice(0,2).join('/')), datasets: [{
+      label: 'Saldo', data: pontosSaldo, borderColor: '#F2C811', backgroundColor: 'rgba(242,200,17,0.1)',
+      fill: true, tension: 0.25, pointRadius: 3, pointBackgroundColor: '#F2C811'
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { grid: { color: gridColor } }, y: { grid: { color: gridColor }, ticks: { callback: v => 'R$'+v } } }
+    }
+  });
+
+  const top5 = filtrados.filter(d => d.tipo === 'despesa').sort((a,b) => b.valor - a.valor).slice(0,5);
+  if (charts.top5) charts.top5.destroy();
+  charts.top5 = new Chart(document.getElementById('chartTop5'), {
+    type: 'bar',
+    data: { labels: top5.map(d => d.desc), datasets: [{ data: top5.map(d => d.valor), backgroundColor: '#FD625E', borderRadius: 2 }] },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { grid: { color: gridColor }, ticks: { callback: v => 'R$'+v } }, y: { grid: { display: false } } }
+    }
+  });
+}
+
+function renderView() {
+  renderSlicers();
+  renderSheet();
+  const filtrados = dadosFiltrados();
+  renderKPIs(filtrados);
+  renderCharts(filtrados);
+}
+
+// ---------- Ações ----------
+document.getElementById('btnAddRow').addEventListener('click', async () => {
+  const hoje = new Date().toISOString().slice(0,10);
+  const novo = { data: hoje, desc: "Novo lançamento", categoria: "Outros", tipo: "despesa", valor: 0 };
+  try {
+    const criado = await criarLancamento(novo);
+    dados.push(criado);
+    renderView();
+  } catch (e) {
+    alert('Não foi possível salvar no servidor. Verifique a conexão.');
+  }
+});
+
+document.getElementById('btnResetFiltros').addEventListener('click', () => {
+  filtros = { mes: null, categoria: null };
+  renderView();
+});
+
+document.getElementById('btnExportCsv').addEventListener('click', () => {
+  window.location.href = API_BASE + '.csv';
+});
+
+// ---------- Inicialização ----------
+(async function init() {
+  try {
+    await carregarDados();
+  } catch (e) {
+    setConn(false);
+    dados = [];
+  }
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'block';
+  renderView();
+})();
+</script>
+</body>
+</html>
