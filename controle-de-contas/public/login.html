@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrar - Controle de Contas</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    background: #111827;
+    color: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+  .caixa {
+    background: #1f2937;
+    padding: 32px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 340px;
+  }
+  h1 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    border: 1px solid #374151;
+    background: #111827;
+    color: #f3f4f6;
+    box-sizing: border-box;
+  }
+  button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+  button.secundario {
+    background: transparent;
+    color: #93c5fd;
+  }
+  #erro {
+    color: #f87171;
+    font-size: 14px;
+    margin-bottom: 12px;
+    min-height: 18px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div class="caixa">
+    <h1 id="titulo">Entrar</h1>
+    <div id="erro"></div>
+    <input type="text" id="usuario" placeholder="Usuário" autocomplete="username">
+    <input type="password" id="senha" placeholder="Senha" autocomplete="current-password">
+    <button id="btnPrincipal">Entrar</button>
+    <button class="secundario" id="btnAlternar">Não tem conta? Cadastre-se</button>
+  </div>
+
+<script>
+  let modoCadastro = false;
+  const titulo = document.getElementById('titulo');
+  const btnPrincipal = document.getElementById('btnPrincipal');
+  const btnAlternar = document.getElementById('btnAlternar');
+  const erroEl = document.getElementById('erro');
+
+  btnAlternar.addEventListener('click', () => {
+    modoCadastro = !modoCadastro;
+    titulo.textContent = modoCadastro ? 'Criar conta' : 'Entrar';
+    btnPrincipal.textContent = modoCadastro ? 'Cadastrar' : 'Entrar';
+    btnAlternar.textContent = modoCadastro ? 'Já tem conta? Entrar' : 'Não tem conta? Cadastre-se';
+    erroEl.textContent = '';
+  });
+
+  btnPrincipal.addEventListener('click', async () => {
+    erroEl.textContent = '';
+    const usuario = document.getElementById('usuario').value.trim();
+    const senha = document.getElementById('senha').value;
+    const rota = modoCadastro ? '/api/registrar' : '/api/login';
+
+    try {
+      const resp = await fetch(rota, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario, senha }),
+      });
+      const dados = await resp.json();
+      if (!resp.ok) {
+        erroEl.textContent = dados.erro || 'Erro ao processar';
+        return;
+      }
+      window.location.href = '/';
+    } catch (e) {
+      erroEl.textContent = 'Erro de conexão com o servidor';
+    }
+  });
+</script>
+</body>
+</html>
