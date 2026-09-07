@@ -20,7 +20,9 @@
     --font: 'Segoe UI', 'Segoe UI Semibold', Tahoma, Geneva, sans-serif;
   }
   * { box-sizing: border-box; }
-  body {
+  body { <button id="btnSair" style="float:right; margin:10px; padding:8px 14px; background:#dc2626; color:white; border:none; border-radius:6px; cursor:pointer;">
+  Sair
+</button>
     margin: 0;
     background: var(--bg);
     color: var(--text);
@@ -662,7 +664,12 @@ document.getElementById('btnExportCsv').addEventListener('click', () => {
   document.getElementById('appRoot').style.display = 'block';
   renderView();
 })();
+</script> 
+  <script>
+  document.getElementById('btnSair').addEventListener('click', () => {
+    fetch('/api/logout', { method: 'POST' })
+      .then(() => { window.location.href = '/login.html'; });
+  });
 </script>
 </body>
 </html>
-fetch('/api/logout', { method: 'POST' }).then(() => window.location.href = '/login.html');
