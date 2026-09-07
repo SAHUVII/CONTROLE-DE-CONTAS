@@ -96,7 +96,7 @@ function parseCookies(cabecalho) {
 // ---------------- Dados por usuário ----------------
 
 function arquivoDadosDoUsuario(usuario) {
-  return path.join(__dirname, dados-${usuario}.json);
+  return path.join(__dirname, `dados-${usuario}.json`);
 }
 
 function lerDadosUsuario(usuario) {
