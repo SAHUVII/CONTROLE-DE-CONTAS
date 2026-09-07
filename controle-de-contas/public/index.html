@@ -665,3 +665,4 @@ document.getElementById('btnExportCsv').addEventListener('click', () => {
 </script>
 </body>
 </html>
+fetch('/api/logout', { method: 'POST' }).then(() => window.location.href = '/login.html');
