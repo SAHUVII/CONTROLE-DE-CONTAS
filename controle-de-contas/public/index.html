@@ -682,5 +682,33 @@ document.getElementById('btnExportCsv').addEventListener('click', () => {
   }
 </script>
 <script src="/install-prompt.js"></script>
+<button id="botao-sair-flutuante" style="
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 9999;
+  background: #fb7373;
+  color: #1a1a1a;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+">Sair</button>
+
+<script>
+  document.getElementById('botao-sair-flutuante').addEventListener('click', function () {
+    fetch('/api/logout', { method: 'POST' })
+      .then(function () {
+        window.location.href = '/login.html';
+      })
+      .catch(function () {
+        window.location.href = '/login.html';
+      });
+  });
+</script>
 </body>
 </html>
