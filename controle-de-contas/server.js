@@ -44,7 +44,8 @@ async function inserirUsuario(usuario, salt, hash) {
     body: JSON.stringify([{ usuario, salt, hash }]),
   });
   if (!resp.ok) {
-    throw new Error('Não foi possível criar o usuário (' + resp.status + ')');
+    const texto = await resp.text();
+    throw new Error(`Supabase recusou (status ${resp.status}): ${texto}`);
   }
 }
 
@@ -334,4 +335,3 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Controle de Contas rodando em http://localhost:${PORT}`);
 });
-
